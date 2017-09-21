@@ -118,7 +118,10 @@ var Blank = function (_Component) {
   function Blank(props) {
     _classCallCheck(this, Blank);
 
-    return _possibleConstructorReturn(this, (Blank.__proto__ || Object.getPrototypeOf(Blank)).call(this, props));
+    var _this = _possibleConstructorReturn(this, (Blank.__proto__ || Object.getPrototypeOf(Blank)).call(this, props));
+
+    console.log('props', props);
+    return _this;
   }
 
   _createClass(Blank, [{
@@ -128,13 +131,18 @@ var Blank = function (_Component) {
     key: 'componentWillReceiveProps',
     value: function componentWillReceiveProps(newProps) {}
   }, {
-    key: 'test',
-    value: function test() {
-      alert(JSON.stringify(this.state));
+    key: 'onClick',
+    value: function onClick() {
+      console.log('getCurrentRigoleTemperature click');
+      this.props.api.call({
+        name: 'getCurrentRigoleTemperature'
+      });
     }
   }, {
     key: 'render',
     value: function render() {
+      var _this2 = this;
+
       return _react2.default.createElement(
         'div',
         null,
@@ -149,6 +157,18 @@ var Blank = function (_Component) {
           'div',
           null,
           this.props.userId
+        ),
+        _react2.default.createElement(
+          'div',
+          null,
+          this.props.temperature
+        ),
+        _react2.default.createElement(
+          'button',
+          { onClick: function onClick() {
+              return _this2.onClick();
+            } },
+          'getCurrentRigoleTemperature'
         )
       );
     }
@@ -169,10 +189,12 @@ Object.defineProperty(exports, "__esModule", {
 
 var _zetapushJs = require('zetapush-js');
 
-exports.default = new _zetapushJs.WeakClient({
+var client = new _zetapushJs.WeakClient({
   apiUrl: 'https://demo-2.zpush.io/zbo/pub/business/',
   sandboxId: 'Q8RxNfar'
 });
+
+exports.default = client;
 
 
 },{"zetapush-js":334}],4:[function(require,module,exports){
@@ -187,6 +209,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 var _react = require('react');
 
 var _react2 = _interopRequireDefault(_react);
+
+var _zetapushJs = require('zetapush-js');
 
 var _Client = require('./Client.js');
 
@@ -211,8 +235,33 @@ exports.default = function (Wrapped) {
 
       _this.state = {
         connected: _Client2.default.isConnected(),
-        userId: _Client2.default.getUserId()
+        userId: _Client2.default.getUserId(),
+        temperature: 'pending'
       };
+      _this.api = _Client2.default.createService({
+        Type: _zetapushJs.services.Macro,
+        listener: {
+          getCurrentRigoleTemperature: function getCurrentRigoleTemperature(result) {
+            _this.setState({
+              temperature: result.data.result.temperature
+            });
+          },
+          pushRigoleTemperature: function pushRigoleTemperature(result) {
+            _this.setState({
+              temperature: result.data.result.temperature
+            });
+          },
+          addUserToAlertGroup: function addUserToAlertGroup(result) {
+            console.log('addUserToAlertGroup', result);
+          },
+          completed: function completed(result) {
+            console.warn('completed', result);
+          },
+          error: function error(result) {
+            console.error('error', result);
+          }
+        }
+      });
       return _this;
     }
 
@@ -222,6 +271,12 @@ exports.default = function (Wrapped) {
         var _this2 = this;
 
         _Client2.default.onConnectionEstablished(function () {
+          _this2.api.call({
+            name: 'addUserToAlertGroup',
+            parameters: {
+              userId: _Client2.default.getUserId()
+            }
+          });
           _this2.setState({
             connected: true,
             userId: _Client2.default.getUserId()
@@ -237,7 +292,12 @@ exports.default = function (Wrapped) {
     }, {
       key: 'render',
       value: function render() {
-        return _react2.default.createElement(Wrapped, { connected: this.state.connected, userId: this.state.userId });
+        return _react2.default.createElement(Wrapped, {
+          api: this.api,
+          connected: this.state.connected,
+          userId: this.state.userId,
+          temperature: this.state.temperature
+        });
       }
     }]);
 
@@ -246,7 +306,7 @@ exports.default = function (Wrapped) {
 };
 
 
-},{"./Client.js":3,"react":331}],5:[function(require,module,exports){
+},{"./Client.js":3,"react":331,"zetapush-js":334}],5:[function(require,module,exports){
 module.exports = { "default": require("core-js/library/fn/array/from"), __esModule: true };
 
 },{"core-js/library/fn/array/from":20}],6:[function(require,module,exports){

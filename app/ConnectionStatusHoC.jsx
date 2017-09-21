@@ -1,4 +1,5 @@
 import React, { Component } from 'react';
+import { services } from 'zetapush-js';
 
 import client from './Client.js';
 
@@ -9,11 +10,42 @@ export default Wrapped => {
       this.state = {
         connected: client.isConnected(),
         userId: client.getUserId(),
+        temperature: 'pending',
       };
+      this.api = client.createService({
+        Type: services.Macro,
+        listener: {
+          getCurrentRigoleTemperature: result => {
+            this.setState({
+              temperature: result.data.result.temperature,
+            });
+          },
+          pushRigoleTemperature: result => {
+            this.setState({
+              temperature: result.data.result.temperature,
+            });
+          },
+          addUserToAlertGroup: result => {
+            console.log('addUserToAlertGroup', result);
+          },
+          completed: result => {
+            console.warn('completed', result);
+          },
+          error: result => {
+            console.error('error', result);
+          },
+        },
+      });
     }
 
     componentDidMount() {
       client.onConnectionEstablished(() => {
+        this.api.call({
+          name: 'addUserToAlertGroup',
+          parameters: {
+            userId: client.getUserId(),
+          },
+        });
         this.setState({
           connected: true,
           userId: client.getUserId(),
@@ -29,7 +61,12 @@ export default Wrapped => {
 
     render() {
       return (
-        <Wrapped connected={this.state.connected} userId={this.state.userId} />
+        <Wrapped
+          api={this.api}
+          connected={this.state.connected}
+          userId={this.state.userId}
+          temperature={this.state.temperature}
+        />
       );
     }
   };
