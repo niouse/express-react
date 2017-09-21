@@ -1,31 +1,27 @@
 import React, { Component } from 'react';
 
-
-
 export default class Blank extends Component {
-  
-	constructor(props) {
-		super(props);
+  constructor(props) {
+    super(props);
+  }
 
-	}
-	
+  componentDidMount() {}
 
-	componentDidMount() {
-	}						
+  componentWillReceiveProps(newProps) {}
 
-	componentWillReceiveProps(newProps) {
-	}
-	
-	
-	test() {
-		alert(JSON.stringify(this.state));
-	}
-	
-	render() {
-		return (
-			<div>
-			<h1>Blank component</h1>
-			</div>
-		);
-	}
+  test() {
+    alert(JSON.stringify(this.state));
+  }
+
+  render() {
+    return (
+      <div>
+        <h1>
+          Blank component{' '}
+          {this.props.connected ? 'connected' : ' not connected'}
+        </h1>
+        <div>{this.props.userId}</div>
+      </div>
+    );
+  }
 }

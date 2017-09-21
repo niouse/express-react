@@ -19,7 +19,8 @@
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
     "react-tap-event-plugin": "^2.0.1",
-    "serve-favicon": "~2.3.0"
+    "serve-favicon": "~2.3.0",
+    "zetapush-js": "^3.2.0-alpha.3"
   },
   "devDependencies": {
     "babel-preset-es2015": "^6.18.0",
